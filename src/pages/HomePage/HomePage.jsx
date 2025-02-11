@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react';
-import { fetchTrendingMovies } from '../../Api';
-import MovieList from '../../components/MovieList/MovieList';
-import styles from './HomePage.module.css';
+import { useEffect, useState } from "react";
+import { fetchTrendingMovies } from "../../api";
+import MovieList from "../../components/MovieList/MovieList";
 
 function HomePage() {
-  const [movies, setMovies] = useState([]);
+    const [movies, setMovies] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    useEffect(() => {
+        setIsLoading(true);
+        fetchTrendingMovies().then(setMovies).then(() => { setIsLoading(false) });
+    }, []);
 
-  useEffect(() => {
-    fetchTrendingMovies().then(setMovies).catch(console.error);
-  }, []);
-
-  return (
-    <div className={styles.container}>
-      <h1>Trending Movies</h1>
-      <MovieList movies={movies} />
-    </div>
-  );
+    return (
+        <div>
+            <h1>Trending Today</h1>
+            <MovieList movies={movies} isLoading={isLoading} />
+        </div>
+    );
 }
 
 export default HomePage;

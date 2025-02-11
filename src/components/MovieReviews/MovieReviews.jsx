@@ -1,32 +1,32 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getMovieReviews } from '../../Api';
-import styles from './MovieReviews.module.css';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchMovieReviews } from "../../api";
 
 function MovieReviews() {
-  const { movieId } = useParams();
-  const [reviews, setReviews] = useState([]);
+    const { movieId } = useParams();
+    const [reviews, setReviews] = useState([]);
 
-  useEffect(() => {
-    getMovieReviews(movieId).then(setReviews).catch(console.error);
-  }, [movieId]);
+    useEffect(() => {
+        fetchMovieReviews(movieId).then(setReviews);
+    }, [movieId]);
 
-  return (
-    <div className={styles.container}>
-      {reviews.length > 0 ? (
-        <ul>
-          {reviews.map((review) => (
-            <li key={review.id}>
-              <h4>{review.author}</h4>
-              <p>{review.content}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No reviews available.</p>
-      )}
-    </div>
-  );
+    return (
+        <div>
+            <h2>Review</h2>
+            {reviews.length > 0 ? (
+                <ul>
+                    {reviews.map(review => (
+                        <li key={review.id}>
+                            <h3>{review.author}</h3>
+                            <p>{review.content}</p>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                    <p>No reviews</p>
+                )}
+        </div>
+    );
 }
 
 export default MovieReviews;

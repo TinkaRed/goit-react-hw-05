@@ -1,26 +1,40 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getMovieCast, getMoviePoster } from '../../Api';
-import styles from './MovieCast.module.css';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchMovieCast } from "../../api";
+import styles from "./MovieCast.module.css";
+
 
 function MovieCast() {
-  const { movieId } = useParams();
-  const [cast, setCast] = useState([]);
+    const { movieId } = useParams();
+    const [cast, setCast] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    getMovieCast(movieId).then(setCast).catch(console.error);
-  }, [movieId]);
+    useEffect(() => {
+        setIsLoading(true);
+        fetchMovieCast(movieId).then(setCast).then(() => { setIsLoading(false) });
+    }, [movieId]);
+    if (isLoading) {
+        return <p>Loading...</p>;
+    }
+    return (
 
-  return (
-    <ul className={styles.list}>
-      {cast.map((actor) => (
-        <li key={actor.id}>
-          <img src={getMoviePoster(actor.profile_path, 'w200')} alt={actor.name} />
-          <p>{actor.name}</p>
-        </li>
-      ))}
-    </ul>
-  );
+        <div>
+            <h2>Actors</h2>
+            {cast.length > 0 ? (
+                <ul>
+                    {cast.map(actor => (
+                        <li key={actor.id}>
+                            <img className={styles.actor} src={`https://image.tmdb.org/t/p/w500${actor.profile_path}`} />
+                            <h3>{actor.name}</h3>
+                            <p>Character: {actor.character}</p>
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                    <p>Not Actors</p>
+                )}
+        </div>
+    );
 }
 
 export default MovieCast;

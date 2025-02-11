@@ -1,28 +1,55 @@
-import { useState } from 'react';
-import { searchMovies } from '../../Api';
-import MovieList from '../../components/MovieList/MovieList';
-import styles from './MoviesPage.module.css';
+import { useState, useEffect } from "react";
+import { searchMovies } from "../../api";
+import MovieList from "../../components/MovieList/MovieList";
+import { useSearchParams } from "react-router-dom";
+import styles from "./MoviesPage.module.css";
 
 function MoviesPage() {
-  const [query, setQuery] = useState('');
-  const [movies, setMovies] = useState([]);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [query, setQuery] = useState(searchParams.get("q") || "");
+    const [movies, setMovies] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-    const results = await searchMovies(query);
-    setMovies(results);
-  };
+    useEffect(() => {
+        updateSearchParams("q", query);
+        if (!query) return;
 
-  return (
-    <div className={styles.container}>
-      <form onSubmit={handleSearch} className={styles.form}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)} />
-        <button type="submit">Search</button>
-      </form>
-      <MovieList movies={movies} />
-    </div>
-  );
+        let isCancelled = false;
+        setIsLoading(true);
+
+        searchMovies(query)
+            .then((data) => {
+                if (!isCancelled) setMovies(data);
+
+            })
+            .finally(() => {
+                if (!isCancelled) setIsLoading(false);
+            });
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [query]);
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+    };
+
+    const updateSearchParams = (key, value) => {
+        const updatedParams = new URLSearchParams(searchParams);
+        updatedParams.set(key, value);
+        setSearchParams(updatedParams);
+    };
+
+    return (
+        <>
+            <form onSubmit={handleSearch}>
+                <input value={query} onChange={(e) => setQuery(e.target.value)} />
+                <button type="submit">Search</button>
+            </form>
+            <MovieList movies={movies} isLoading={isLoading} />
+        </>
+    );
 }
 
 export default MoviesPage;
